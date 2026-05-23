@@ -8,11 +8,14 @@ const inter = Inter({
   subsets: ["latin", "latin-ext"],
 });
 
-export const metadata: Metadata = {
-  title: "MindPocket — Psycholog ve vaší kapse",
-  description: "AI psycholog, deník nálad, dechová cvičení a krizová podpora. Vše na jednom místě.",
+export const metadata = {
+  title: 'MindPocket — Created by Tetiana Kotolup',
+  description: 'Created by Tetiana Kotolup',
+
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
   },
 };
 
