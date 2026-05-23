@@ -195,3 +195,12 @@
     transform: translateY(-28px) scale(1.08);
   }
 }
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-28px) scale(1.08);
+  }
+}
