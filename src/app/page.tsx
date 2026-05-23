@@ -30,6 +30,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#07070a] via-[#10101a] to-[#050505] text-white relative overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+  <div className="absolute top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-500/20 blur-3xl animate-pulse" />
+  <div className="absolute bottom-20 left-10 h-56 w-56 rounded-full bg-teal-400/10 blur-3xl animate-[float_9s_ease-in-out_infinite]" />
+  <div className="absolute top-1/3 right-10 h-48 w-48 rounded-full bg-purple-400/10 blur-3xl animate-[float_12s_ease-in-out_infinite]" />
+</div>
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.22),transparent_35%),radial-gradient(circle_at_bottom,rgba(45,212,191,0.12),transparent_35%)] pointer-events-none" />
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
