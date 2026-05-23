@@ -16,7 +16,7 @@ import { DiarySection } from '@/components/diary-section';
 import { BreathingSection } from '@/components/breathing-section';
 import { CrisisSection } from '@/components/crisis-section';
 import { MusicPlayer } from '@/components/music-player';
-const [bassLevel, setBassLevel] = useState(0);
+
 const tabs = [
   { id: 'chat' as const, label: 'Chat', icon: MessageCircle },
   { id: 'diary' as const, label: 'Deník', icon: BookHeart },
