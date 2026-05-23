@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, BookHeart, Wind, Phone, Music, Brain, X, Volume2, VolumeX } from 'lucide-react';
+import { useState } from 'react';
+import { MessageCircle, BookHeart, Wind, Phone, Music, Brain, VolumeX } from 'lucide-react';
 import { ChatSection } from '@/components/chat-section';
 import { DiarySection } from '@/components/diary-section';
 import { BreathingSection } from '@/components/breathing-section';
@@ -20,89 +20,81 @@ type TabId = 'chat' | 'diary' | 'breathing' | 'crisis';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showMusic, setShowMusic] = useState(false);
-  const [contentKey, setContentKey] = useState(0);
-
-  const handleTabChange = (tab: TabId) => {
-    setActiveTab(tab);
-    setContentKey(prev => prev + 1);
-  };
 
   const renderSection = () => {
-    switch (activeTab) {
-      case 'chat': return <ChatSection />;
-      case 'diary': return <DiarySection />;
-      case 'breathing': return <BreathingSection />;
-      case 'crisis': return <CrisisSection />;
-    }
+    if (activeTab === 'chat') return <ChatSection />;
+    if (activeTab === 'diary') return <DiarySection />;
+    if (activeTab === 'breathing') return <BreathingSection />;
+    return <CrisisSection />;
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-black relative overflow-hidden">
-      {/* Subtle dot grid background */}
-      <div className="fixed inset-0 dot-grid opacity-30 pointer-events-none" />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#07070a] via-[#10101a] to-[#050505] text-white relative overflow-hidden">
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.22),transparent_35%),radial-gradient(circle_at_bottom,rgba(45,212,191,0.12),transparent_35%)] pointer-events-none" />
 
-      {/* Ambient glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass-strong">
-        <div className="max-w-lg mx-auto px-5 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+        <div className="max-w-xl mx-auto px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center">
-              <Brain className="w-4 h-4 text-black" />
+            <div className="w-11 h-11 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg">
+              <Brain className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold tracking-tight">MindPocket</h1>
-              <p className="text-[10px] text-white/30 tracking-widest uppercase">Psycholog v kapse</p>
+              <h1 className="text-lg font-bold">MindPocket</h1>
+              <p className="text-xs text-white/50 uppercase tracking-[0.2em]">Psycholog v kapse</p>
             </div>
           </div>
 
           <button
             onClick={() => setShowMusic(!showMusic)}
-            className="w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all duration-300 group"
+            className="w-11 h-11 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition"
           >
-            {showMusic ? (
-              <VolumeX className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
-            ) : (
-              <Music className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
-            )}
+            {showMusic ? <VolumeX className="w-5 h-5" /> : <Music className="w-5 h-5" />}
           </button>
         </div>
       </header>
 
-      {/* Music Player */}
-      {showMusic && <MusicPlayer />}
+      {showMusic && (
+        <div className="max-w-xl mx-auto w-full px-5 mt-4 z-10">
+          <MusicPlayer />
+        </div>
+      )}
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-lg mx-auto w-full px-5 py-4 pb-28">
-        <div key={contentKey} className="animate-fade-in">
+      <main className="flex-1 max-w-xl mx-auto w-full px-5 py-8 pb-32 relative z-10">
+        <section className="text-center mb-8">
+          <div className="mx-auto mb-5 w-24 h-24 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-2xl">
+            <div className="w-4 h-4 rounded-full bg-white animate-pulse" />
+          </div>
+
+          <h2 className="text-4xl font-semibold tracking-tight mb-3">
+            Ahoj, jsem tu pro vás
+          </h2>
+
+          <p className="text-white/55 text-base leading-relaxed max-w-md mx-auto">
+            Vyberte téma nebo napište, co právě cítíte. MindPocket vám pomůže zklidnit myšlenky.
+          </p>
+        </section>
+
+        <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] backdrop-blur-xl shadow-2xl p-4">
           {renderSection()}
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong safe-bottom">
-        <div className="max-w-lg mx-auto flex items-center justify-around py-2 px-4">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/70 backdrop-blur-xl">
+        <div className="max-w-xl mx-auto flex items-center justify-around py-3 px-4">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+
             return (
               <button
                 key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className="flex flex-col items-center gap-1 py-2 px-4 transition-all duration-300 group"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition ${
+                  isActive ? 'bg-white text-black' : 'text-white/40 hover:text-white'
+                }`}
               >
-                <div className={`transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-30 group-hover:opacity-50'}`}>
-                  <Icon className={`w-5 h-5 transition-all duration-300 ${isActive ? 'stroke-[2px]' : ''}`} />
-                </div>
-                <span className={`text-[9px] tracking-wider uppercase transition-all duration-300 ${
-                  isActive ? 'text-white/90 font-medium' : 'text-white/30'
-                }`}>
-                  {tab.label}
-                </span>
-                {isActive && (
-                  <div className="w-1 h-1 rounded-full bg-white mt-0.5 animate-fade-in-scale" />
-                )}
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] uppercase tracking-wider">{tab.label}</span>
               </button>
             );
           })}
