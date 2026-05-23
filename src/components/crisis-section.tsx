@@ -1,180 +1,137 @@
 'use client';
 
 import { Phone, AlertTriangle, Heart, Globe, MessageCircle, Shield } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 
 const crisisLines = [
   {
-    name: 'Единый телефон доверия',
-    phone: '8-800-333-44-34',
-    description: 'Бесплатная психологическая помощь по всей России, круглосуточно',
+    name: 'Linka první psychické pomoci',
+    phone: '116 123',
+    description: 'Bezplatná, anonymní krizová linka pro dospělé. Nonstop.',
     icon: Phone,
-    color: 'from-red-400 to-rose-500',
   },
   {
-    name: 'Телефон доверия для детей и подростков',
-    phone: '8-800-2000-122',
-    description: 'Бесплатная, анонимная помощь для детей, подростков и их родителей',
+    name: 'Linka bezpečí (děti a dospívající)',
+    phone: '116 111',
+    description: 'Nonstop bezplatná linka pro děti a mládež v krizi.',
     icon: Heart,
-    color: 'from-pink-400 to-rose-500',
   },
   {
-    name: 'Московский телефон доверия',
-    phone: '+7 (495) 051',
-    description: 'Круглосуточная психологическая помощь, бесплатный номер',
-    icon: Phone,
-    color: 'from-orange-400 to-amber-500',
-  },
-  {
-    name: 'Горячая линия психологической помощи МЧС',
-    phone: '+7 (495) 989-50-50',
-    description: 'Психологическая помощь в чрезвычайных ситуациях',
+    name: 'Linka psychické pomoci RIAPS',
+    phone: '284 016 666',
+    description: 'Konzultace s psychologem, denně 8:00–24:00.',
     icon: Shield,
-    color: 'from-amber-400 to-yellow-500',
+  },
+  {
+    name: 'Modrá linka',
+    phone: '284 016 667',
+    description: 'Krizová intervence pro děti, rodinu a vztahy.',
+    icon: MessageCircle,
   },
 ];
 
 const onlineResources = [
   {
-    name: 'b17.ru',
-    url: 'https://www.b17.ru',
-    description: 'Крупнейший портал психологической помощи в России. Поиск психолога, статьи, форум.',
-    icon: Globe,
-  },
-    {
-    name: 'Я Психолог',
-    url: 'https://ipsy.ru',
-    description: 'Онлайн-консультации с психологами. Первый сеанс бесплатно.',
-    icon: MessageCircle,
+    name: 'Dobré ráno',
+    url: 'https://www.doberano.cz',
+    description: 'Online poradenství a psychoterapie. Čeští psychologové.',
   },
   {
-    name: 'Alter',
-    url: 'https://alter-psych.ru',
-    description: 'Подбор психолога по параметрам. Очные и онлайн-сессии.',
-    icon: Heart,
+    name: 'Nevčnímej',
+    url: 'https://www.nevdimej.cz',
+    description: 'Prevence suicidů. Online chat a podpora v krizi.',
+  },
+  {
+    name: 'Psyhelp',
+    url: 'https://www.psyhelp.cz',
+    description: 'Databáze psychologů a psychoterapeutů v ČR.',
   },
 ];
 
 const selfHelpTips = [
-  {
-    title: 'Поговорите с кем-нибудь',
-    description: 'Расскажите близкому человеку о том, что чувствуете. Даже простой разговор может помочь.',
-  },
-  {
-    title: 'Дыхательные упражнения',
-    description: 'Попробуйте медленное дыхание: вдох 4 секунды, задержка 7 секунд, выдох 8 секунд.',
-  },
-  {
-    title: 'Физическая активность',
-    description: 'Даже короткая прогулка может улучшить настроение. Движение снимает напряжение.',
-  },
-  {
-    title: 'Запишите мысли',
-    description: 'Выпишите всё, что вас беспокоит. Это помогает структурировать мысли и снизить тревогу.',
-  },
-  {
-    title: 'Ограничьте информацию',
-    description: 'Сделайте перерыв от новостей и соцсетей. Информационный шум усиливает тревогу.',
-  },
-  {
-    title: 'Обратитесь к специалисту',
-    description: 'Если вы чувствуете, что не справляетесь, обратитесь к психологу или психотерапевту.',
-  },
+  { title: 'Promluvte si s někým', description: 'Řekněte blízkému, co cítíte. I jednoduchý rozhovor může pomoci.' },
+  { title: 'Dechová cvičení', description: 'Zkuste pomalé dýchání: nádech 4s, zadržet 7s, výdech 8s.' },
+  { title: 'Pohyb', description: 'I krátká procházka může zlepšit náladu. Pohyb uvolňuje napětí.' },
+  { title: 'Zapište si myšlenky', description: 'Napište vše, co vás trápí. Pomáhá to strukturovat myšlenky.' },
+  { title: 'Omezte informace', description: 'Udělejte si pauzu od zpráv a sítí. Informační šum zvyšuje úzkost.' },
+  { title: 'Vyhledejte odborníka', description: 'Pokud si neporadíte, kontaktujte psychologa nebo psychoterapeuta.' },
 ];
 
 export function CrisisSection() {
   return (
     <div className="space-y-6">
-      {/* Warning Banner */}
-      <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-4 flex items-start gap-3">
-        <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-0.5" />
-        <div>
-          <h3 className="font-semibold text-destructive">Если вам нужна срочная помощь</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Если вы или кто-то из ваших близких находится в кризисной ситуации, пожалуйста, обратитесь за профессиональной помощью. Вы не одни.
-          </p>
+      {/* Warning */}
+      <div className="rounded-2xl p-4 border border-white/[0.08] bg-white/[0.02]">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-medium text-white/70">Potřebujete okamžitou pomoc?</h3>
+            <p className="text-xs text-white/30 mt-1 leading-relaxed">
+              Pokud vy nebo někdo blízký jste v krizové situaci, kontaktujte odbornou pomoc. Nejdete sami.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Hotlines */}
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Phone className="w-5 h-5 text-primary" />
-          Горячие линии
-        </h2>
+        <p className="text-[9px] text-white/30 tracking-widest uppercase">Krizové linky ČR</p>
         {crisisLines.map((line, i) => {
           const Icon = line.icon;
           return (
-            <Card key={i} className="border-border/50 overflow-hidden">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${line.color} flex items-center justify-center flex-shrink-0`}>
-                  <Icon className="w-6 h-6 text-white" />
+            <div key={i} className="glass rounded-2xl p-4 hover-lift">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-white/40" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground text-sm">{line.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{line.description}</p>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-white/70">{line.name}</h3>
+                  <p className="text-xs text-white/25 mt-0.5">{line.description}</p>
                   <a
-                    href={`tel:${line.phone.replace(/[^0-9+]/g, '')}`}
-                    className="text-sm font-bold text-primary hover:underline mt-1 inline-block"
+                    href={`tel:${line.phone.replace(/\s/g, '')}`}
+                    className="text-sm font-medium text-white/80 hover:text-white transition-colors mt-2 inline-block tracking-wide"
                   >
                     {line.phone}
                   </a>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         })}
       </div>
 
-      {/* Online Resources */}
+      {/* Online */}
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Globe className="w-5 h-5 text-primary" />
-          Онлайн-ресурсы
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {onlineResources.map((resource, i) => {
-            const Icon = resource.icon;
-            return (
-              <Card key={i} className="border-border/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-primary" />
-                    </div>
-                    <h3 className="font-semibold text-foreground text-sm">{resource.name}</h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{resource.description}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <p className="text-[9px] text-white/30 tracking-widest uppercase">Online zdroje</p>
+        <div className="grid grid-cols-1 gap-2">
+          {onlineResources.map((r, i) => (
+            <div key={i} className="glass rounded-xl p-4 hover-lift">
+              <div className="flex items-center gap-2 mb-1">
+                <Globe className="w-3 h-3 text-white/20" />
+                <h4 className="text-sm text-white/60">{r.name}</h4>
+              </div>
+              <p className="text-xs text-white/25">{r.description}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Self Help Tips */}
+      {/* Tips */}
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Heart className="w-5 h-5 text-primary" />
-          Советы по самопомощи
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <p className="text-[9px] text-white/30 tracking-widest uppercase">Sebepomoc</p>
+        <div className="grid grid-cols-2 gap-2 stagger-children">
           {selfHelpTips.map((tip, i) => (
-            <div
-              key={i}
-              className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-colors"
-            >
-              <h4 className="text-sm font-medium text-foreground">{tip.title}</h4>
-              <p className="text-xs text-muted-foreground mt-1">{tip.description}</p>
+            <div key={i} className="glass rounded-xl p-3">
+              <h4 className="text-xs font-medium text-white/50 mb-1">{tip.title}</h4>
+              <p className="text-[10px] text-white/20 leading-relaxed">{tip.description}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Disclaimer */}
-      <div className="text-center py-4 px-4 rounded-xl bg-muted/50">
-        <p className="text-xs text-muted-foreground">
-          Это приложение не является медицинской услугой и не заменяет профессиональную психологическую или психиатрическую помощь. Если у вас серьёзные проблемы со здоровьем, обратитесь к специалисту.
+      <div className="text-center py-4">
+        <p className="text-[9px] text-white/10 tracking-wider">
+          Tato aplikace nenahrazuje odbornou psychologickou nebo psychiatrickou péči.
         </p>
       </div>
     </div>

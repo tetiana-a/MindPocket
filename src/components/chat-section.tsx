@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Send, Loader2, ArrowUp } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -12,12 +10,12 @@ interface Message {
 }
 
 const suggestedQuestions = [
-  'Мне сейчас тревожно, помогите успокоиться',
-  'Я не могу справиться со стрессом на работе',
-  'У меня проблемы в отношениях',
-  'Чувствую одиночество, что делать?',
-  'Как справиться с бессонницей?',
-  'Хочу научиться управлять гневом',
+  'Cítím se úzkostně, pomozte mi se uklidnit',
+  'Nevím, jak zvládnout stres v práci',
+  'Mám problémy v partnerském vztahu',
+  'Cítím se osaměle, co mám dělat?',
+  'Jak zvládnout nespavost?',
+  'Chci se naučit ovládat hněv',
 ];
 
 export function ChatSection() {
@@ -25,7 +23,6 @@ export function ChatSection() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -46,30 +43,14 @@ export function ChatSection() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: messageText,
-          history: messages.slice(-10),
-        }),
+        body: JSON.stringify({ message: messageText, history: messages.slice(-10) }),
       });
 
       const data = await response.json();
-
-      if (data.reply) {
-        const assistantMessage: Message = { role: 'assistant', content: data.reply };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } else {
-        const errorMessage: Message = {
-          role: 'assistant',
-          content: 'Извините, произошла ошибка. Попробуйте ещё раз.',
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      }
+      const reply = data.reply || 'Omlouvám se, došlo k chybě. Zkuste to znovu.';
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch {
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Не удалось подключиться к серверу. Проверьте интернет-соединение.',
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Nepodařilo se připojit k serveru.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -83,25 +64,30 @@ export function ChatSection() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
-      {/* Welcome message */}
+    <div className="flex flex-col h-[calc(100vh-200px)]">
+      {/* Welcome */}
       {messages.length === 0 && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <Sparkles className="w-10 h-10 text-primary" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 px-2">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-white animate-pulse-soft" />
+            </div>
+            <div className="absolute -inset-4 rounded-full bg-white/[0.02] blur-xl" />
           </div>
-          <div className="text-center space-y-2">
-            <h2 className="text-xl font-semibold text-foreground">Привет! Я твой ИИ-психолог</h2>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Я здесь, чтобы выслушать и поддержать тебя. Расскажи, что тебя беспокоит, или выбери тему ниже.
+
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl font-light tracking-tight">Ahoj, jsem tu pro vás</h2>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed">
+              Vyprávějte mi, co vás trápí, nebo si vyberte téma níže.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
+
+          <div className="grid grid-cols-1 gap-2 w-full max-w-sm stagger-children">
             {suggestedQuestions.map((q, i) => (
               <button
                 key={i}
                 onClick={() => sendMessage(q)}
-                className="text-left text-sm px-4 py-3 rounded-xl border border-border bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200 text-muted-foreground hover:text-foreground"
+                className="text-left text-sm px-4 py-3 rounded-2xl glass hover-lift text-white/50 hover:text-white/80 transition-all duration-300"
               >
                 {q}
               </button>
@@ -112,79 +98,67 @@ export function ChatSection() {
 
       {/* Messages */}
       {messages.length > 0 && (
-        <ScrollArea className="flex-1 pr-2" ref={scrollRef}>
-          <div className="space-y-4 py-2">
-            {messages.map((msg, i) => (
+        <div className="flex-1 overflow-y-auto pr-1 space-y-4 py-2" ref={scrollRef}>
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`animate-fade-in flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
               <div
-                key={i}
-                className={`message-appear flex gap-3 ${
-                  msg.role === 'user' ? 'justify-end' : 'justify-start'
+                className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'bg-white text-black rounded-2xl rounded-br-lg'
+                    : 'glass rounded-2xl rounded-bl-lg text-white/80'
                 }`}
               >
-                {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-card border border-border text-foreground rounded-bl-md'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
-                </div>
-                {msg.role === 'user' && (
-                  <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 mt-1">
-                    <User className="w-4 h-4 text-secondary-foreground" />
-                  </div>
-                )}
+                <div className="whitespace-pre-wrap">{msg.content}</div>
               </div>
-            ))}
+            </div>
+          ))}
 
-            {isLoading && (
-              <div className="flex gap-3 justify-start message-appear">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4 text-primary" />
-                </div>
-                <div className="bg-card border border-border px-4 py-3 rounded-2xl rounded-bl-md">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Печатает...
+          {isLoading && (
+            <div className="flex justify-start animate-fade-in">
+              <div className="glass px-5 py-4 rounded-2xl rounded-bl-lg">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-white/30 typing-dot" />
+                    <div className="w-2 h-2 rounded-full bg-white/30 typing-dot" />
+                    <div className="w-2 h-2 rounded-full bg-white/30 typing-dot" />
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </ScrollArea>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Input */}
-      <div className="mt-4 flex gap-2 items-end">
-        <Textarea
-          ref={textareaRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Напишите, что вас беспокоит..."
-          className="resize-none min-h-[44px] max-h-[120px] rounded-xl border-border bg-card"
-          rows={1}
-          disabled={isLoading}
-        />
-        <Button
-          onClick={() => sendMessage()}
-          disabled={!input.trim() || isLoading}
-          size="icon"
-          className="h-11 w-11 rounded-xl bg-primary hover:bg-primary/90 flex-shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </Button>
-      </div>
+      <div className="mt-4 relative">
+        <div className="flex items-end gap-2">
+          <div className="flex-1 relative">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Napište, co vás trápí..."
+              className="resize-none min-h-[48px] max-h-[120px] rounded-2xl bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20 focus-visible:ring-white/20 focus-visible:border-white/15 pr-12"
+              rows={1}
+              disabled={isLoading}
+            />
+          </div>
+          <button
+            onClick={() => sendMessage()}
+            disabled={!input.trim() || isLoading}
+            className="h-12 w-12 rounded-full bg-white text-black flex items-center justify-center flex-shrink-0 disabled:opacity-10 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </button>
+        </div>
 
-      <p className="text-[10px] text-muted-foreground text-center mt-2">
-        ИИ-психолог не заменяет профессиональную помощь
-      </p>
+        <p className="text-[9px] text-white/15 text-center mt-3 tracking-wider uppercase">
+          AI psycholog nenahrazuje odbornou pomoc
+        </p>
+      </div>
     </div>
   );
 }
