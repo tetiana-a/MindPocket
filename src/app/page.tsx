@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import {
   MessageCircle,
   BookHeart,
@@ -29,76 +29,6 @@ type TabId = 'chat' | 'diary' | 'breathing' | 'crisis';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showMusic, setShowMusic] = useState(false);
-  
-  // Refs для анимированных элементов фона
-  const blob1 = useRef<HTMLDivElement>(null);
-  const blob2 = useRef<HTMLDivElement>(null);
-  const blob3 = useRef<HTMLDivElement>(null);
-  
-  // Состояние позиции курсора/касания
-  const mouse = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    // Инициализация начальной позиции в центре
-    mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        mouse.current.x = e.touches[0].clientX;
-        mouse.current.y = e.touches[0].clientY;
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
-
-    // Анимационный цикл (60fps)
-    let animationFrameId: number;
-    let time = 0;
-
-    const animate = () => {
-      time += 0.005; // Скорость "дыхания"
-
-      // Логика плавного следования за курсором (Easing)
-      // Коэффициенты подобраны для гипнотического эффекта
-      if (blob1.current && blob2.current && blob3.current) {
-        // Blob 1: Следует за курсором с задержкой + органическое движение
-        const x1 = Math.sin(time * 1.5) * 100 + (mouse.current.x - window.innerWidth / 2) * 0.05;
-        const y1 = Math.cos(time * 1.2) * 100 + (mouse.current.y - window.innerHeight / 2) * 0.05;
-        const scale1 = 1 + Math.sin(time * 2) * 0.1;
-        
-        blob1.current.style.transform = `translate(${x1}px, ${y1}px) scale(${scale1})`;
-
-        // Blob 2: Противоположное движение + реакция на курсор
-        const x2 = Math.cos(time * 1.1) * 150 - (mouse.current.x - window.innerWidth / 2) * 0.08;
-        const y2 = Math.sin(time * 0.9) * 150 - (mouse.current.y - window.innerHeight / 2) * 0.08;
-        const scale2 = 1 + Math.cos(time * 1.5) * 0.15;
-
-        blob2.current.style.transform = `translate(${x2}px, ${y2}px) scale(${scale2})`;
-
-        // Blob 3: Хаотичное спокойное движение + слабая реакция
-        const x3 = Math.sin(time * 0.8) * 80 + Math.cos(time * 2) * 40 + (mouse.current.x - window.innerWidth / 2) * 0.03;
-        const y3 = Math.cos(time * 1.3) * 80 + Math.sin(time * 1.5) * 40 + (mouse.current.y - window.innerHeight / 2) * 0.03;
-        
-        blob3.current.style.transform = `translate(${x3}px, ${y3}px)`;
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
 
   const renderSection = () => {
     if (activeTab === 'chat') return <ChatSection />;
@@ -109,43 +39,53 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#05060a] text-white relative overflow-hidden">
-      
-      {/* --- ГИПНОТИЧЕСКИЙ ФОН (NEW GEN EFFECT) --- */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        
-        {/* Подложка для глубины */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(10,10,20,0),rgba(5,6,10,1))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.18),transparent_32%),radial-gradient(circle_at_bottom,rgba(0,212,255,0.12),transparent_38%),linear-gradient(to_bottom,#05060a,#070b14,#040507)]" />
 
-        {/* Blob 1 - Основной фиолетовый */}
-        <div 
-          ref={blob1}
-          className="absolute top-1/4 left-1/3 h-[60vw] w-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-indigo-600/30 blur-[80px] transition-transform duration-100 ease-out"
-          style={{ mixBlendMode: 'screen', willChange: 'transform' }}
+        <div
+          className="absolute top-[8%] left-[10%] h-[38rem] w-[38rem] rounded-full bg-violet-500/20 blur-[120px]"
+          style={{
+            animation: 'auroraFloat1 18s ease-in-out infinite',
+            mixBlendMode: 'screen',
+          }}
         />
 
-        {/* Blob 2 - Бирюзовый контраст */}
-        <div 
-          ref={blob2}
-          className="absolute bottom-1/4 right-1/4 h-[50vw] w-[50vw] max-w-[500px] max-h-[500px] rounded-full bg-cyan-500/20 blur-[80px] transition-transform duration-100 ease-out"
-          style={{ mixBlendMode: 'screen', willChange: 'transform' }}
+        <div
+          className="absolute bottom-[4%] right-[8%] h-[34rem] w-[34rem] rounded-full bg-cyan-400/15 blur-[120px]"
+          style={{
+            animation: 'auroraFloat2 24s ease-in-out infinite',
+            mixBlendMode: 'screen',
+          }}
         />
 
-        {/* Blob 3 - Призрачный розовый */}
-        <div 
-          ref={blob3}
-          className="absolute top-1/2 left-1/2 h-[40vw] w-[40vw] max-w-[400px] max-h-[400px] rounded-full bg-fuchsia-600/20 blur-[80px] transition-transform duration-100 ease-out"
-          style={{ mixBlendMode: 'screen', willChange: 'transform' }}
+        <div
+          className="absolute top-[42%] left-[44%] h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/12 blur-[100px]"
+          style={{
+            animation: 'auroraFloat3 20s ease-in-out infinite',
+            mixBlendMode: 'screen',
+          }}
         />
 
-        {/* Зернистость (Noise) для текстуры "Люкс" */}
-        <div className="absolute inset-0 opacity-[0.15]" style={{ 
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
-            backgroundRepeat: 'repeat'
-          }} 
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            background:
+              'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.08) 45%, transparent 100%)',
+            animation: 'beamMove 14s linear infinite',
+          }}
         />
+
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27 viewBox=%270 0 200 200%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")',
+          }}
+        />
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_45%,rgba(0,0,0,0.75)_100%)]" />
       </div>
 
-      {/* --- UI LAYER --- */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/65 backdrop-blur-2xl">
         <div className="max-w-xl mx-auto px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
