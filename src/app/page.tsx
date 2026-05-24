@@ -29,6 +29,7 @@ type TabId = 'chat' | 'diary' | 'breathing' | 'crisis';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showMusic, setShowMusic] = useState(false);
+  const [bassLevel, setBassLevel] = useState(0);
 
   const renderSection = () => {
     if (activeTab === 'chat') return <ChatSection />;
@@ -37,41 +38,79 @@ export default function Home() {
     return <CrisisSection />;
   };
 
+  const bassScale = 1 + bassLevel * 0.35;
+  const bassOpacity = 0.75 + bassLevel * 0.25;
+  const bassBlur = 120 + bassLevel * 40;
+
   return (
     <div className="min-h-screen bg-[#05060a] text-white relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.18),transparent_32%),radial-gradient(circle_at_bottom,rgba(0,212,255,0.12),transparent_38%),linear-gradient(to_bottom,#05060a,#070b14,#040507)]" />
+        <div
+          className={`absolute inset-0 transition-all duration-700 ${
+            showMusic
+              ? 'bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.24),transparent_32%),radial-gradient(circle_at_bottom,rgba(0,212,255,0.18),transparent_38%),linear-gradient(to_bottom,#03040a,#0b1020,#040507)]'
+              : 'bg-[radial-gradient(circle_at_top,rgba(120,119,198,0.18),transparent_32%),radial-gradient(circle_at_bottom,rgba(0,212,255,0.12),transparent_38%),linear-gradient(to_bottom,#05060a,#070b14,#040507)]'
+          }`}
+        />
 
         <div
-          className="absolute top-[8%] left-[10%] h-[38rem] w-[38rem] rounded-full bg-violet-500/20 blur-[120px]"
+          className={`absolute top-[8%] left-[10%] rounded-full transition-all duration-300 ${
+            showMusic
+              ? 'h-[42rem] w-[42rem] bg-fuchsia-500/30'
+              : 'h-[38rem] w-[38rem] bg-violet-500/20'
+          }`}
           style={{
-            animation: 'auroraFloat1 18s ease-in-out infinite',
+            transform: `scale(${bassScale})`,
+            opacity: bassOpacity,
+            filter: `blur(${bassBlur}px)`,
+            animation: showMusic
+              ? 'auroraFloat1 8s ease-in-out infinite'
+              : 'auroraFloat1 18s ease-in-out infinite',
             mixBlendMode: 'screen',
           }}
         />
 
         <div
-          className="absolute bottom-[4%] right-[8%] h-[34rem] w-[34rem] rounded-full bg-cyan-400/15 blur-[120px]"
+          className={`absolute bottom-[4%] right-[8%] rounded-full transition-all duration-300 ${
+            showMusic
+              ? 'h-[38rem] w-[38rem] bg-cyan-400/25'
+              : 'h-[34rem] w-[34rem] bg-cyan-400/15'
+          }`}
           style={{
-            animation: 'auroraFloat2 24s ease-in-out infinite',
+            transform: `scale(${1 + bassLevel * 0.25})`,
+            opacity: 0.65 + bassLevel * 0.35,
+            filter: `blur(${120 + bassLevel * 35}px)`,
+            animation: showMusic
+              ? 'auroraFloat2 10s ease-in-out infinite'
+              : 'auroraFloat2 24s ease-in-out infinite',
             mixBlendMode: 'screen',
           }}
         />
 
         <div
-          className="absolute top-[42%] left-[44%] h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/12 blur-[100px]"
+          className={`absolute top-[42%] left-[44%] rounded-full transition-all duration-300 ${
+            showMusic
+              ? 'h-[30rem] w-[30rem] bg-pink-500/25'
+              : 'h-[26rem] w-[26rem] bg-fuchsia-500/12'
+          }`}
           style={{
-            animation: 'auroraFloat3 20s ease-in-out infinite',
+            transform: `scale(${1 + bassLevel * 0.45})`,
+            opacity: 0.55 + bassLevel * 0.45,
+            filter: `blur(${100 + bassLevel * 30}px)`,
+            animation: showMusic
+              ? 'auroraFloat3 7s ease-in-out infinite'
+              : 'auroraFloat3 20s ease-in-out infinite',
             mixBlendMode: 'screen',
           }}
         />
 
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 transition-opacity duration-700"
           style={{
+            opacity: showMusic ? 0.18 + bassLevel * 0.22 : 0.12,
             background:
               'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.08) 45%, transparent 100%)',
-            animation: 'beamMove 14s linear infinite',
+            animation: showMusic ? 'beamMove 7s linear infinite' : 'beamMove 14s linear infinite',
           }}
         />
 
@@ -103,7 +142,10 @@ export default function Home() {
           </div>
 
           <button
-            onClick={() => setShowMusic((value) => !value)}
+            onClick={() => {
+              setShowMusic((value) => !value);
+              if (showMusic) setBassLevel(0);
+            }}
             className="w-11 h-11 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90"
             aria-label="Toggle music player"
           >
@@ -119,7 +161,7 @@ export default function Home() {
       <main className="relative z-10 max-w-xl mx-auto w-full px-5 pt-28 pb-36">
         {showMusic && (
           <div className="mb-5 rounded-[1.5rem] border border-white/10 bg-black/55 backdrop-blur-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-            <MusicPlayer />
+            <MusicPlayer onBassChange={setBassLevel} />
           </div>
         )}
 
