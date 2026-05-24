@@ -3,35 +3,112 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Music } from 'lucide-react';
 
+type MusicPlayerProps = {
+  onBassChange?: (level: number) => void;
+};
+
 const tracks = [
-  {
-    id: 1,
-    name: 'Rain on Glass',
-    artist: 'Ambient',
-    src: '/music/rain.mp3',
-  },
-  {
-    id: 2,
-    name: 'Ocean Waves',
-    artist: 'Nature',
-    src: '/music/ocean.mp3',
-  },
-  {
-    id: 3,
-    name: 'Deep Focus',
-    artist: 'Lo-Fi',
-    src: '/music/deep.mp3',
-  },
+  { id: 1, name: 'Rain on Glass', artist: 'Ambient', src: '/music/rain.mp3' },
+  { id: 2, name: 'Ocean Waves', artist: 'Nature', src: '/music/ocean.mp3' },
+  { id: 3, name: 'Deep Focus', artist: 'Lo-Fi', src: '/music/deep.mp3' },
 ];
 
-export function MusicPlayer() {
+export function MusicPlayer({ onBassChange }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const frameRef = useRef<number | null>(null);
 
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const track = tracks[currentTrack];
+
+  const setupAudioAnalysis = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!audioContextRef.current) {
+      const AudioContextClass =
+        window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+
+      const audioContext = new AudioContextClass();
+      const analyser = audioContext.createAnalyser();
+
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+
+      const source = audioContext.createMediaElementSource(audio);
+
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      sourceRef.current = source;
+    }
+  };
+
+  const startBassLoop = () => {
+    const analyser = analyserRef.current;
+    if (!analyser) return;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const tick = () => {
+      analyser.getByteFrequencyData(dataArray);
+
+      const bassBins = dataArray.slice(0, 10);
+      const bassAverage =
+        bassBins.reduce((sum, value) => sum + value, 0) / bassBins.length;
+
+      const bassLevel = Math.min(bassAverage / 180, 1);
+
+      onBassChange?.(bassLevel);
+
+      frameRef.current = requestAnimationFrame(tick);
+    };
+
+    tick();
+  };
+
+  const stopBassLoop = () => {
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+
+    onBassChange?.(0);
+  };
+
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      setupAudioAnalysis();
+
+      if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+        stopBassLoop();
+      } else {
+        await audio.play();
+        setIsPlaying(true);
+        startBassLoop();
+      }
+    } catch (error) {
+      console.log('Audio play blocked:', error);
+      setIsPlaying(false);
+      stopBassLoop();
+    }
+  };
 
   const nextTrack = () => {
     setCurrentTrack((prev) => (prev + 1) % tracks.length);
@@ -45,34 +122,23 @@ export function MusicPlayer() {
     setIsPlaying(true);
   };
 
-  const togglePlay = async () => {
-    if (!audioRef.current) return;
-
-    try {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        await audioRef.current.play();
-        setIsPlaying(true);
-      }
-    } catch (error) {
-      console.log('Audio play blocked:', error);
-    }
-  };
-
   useEffect(() => {
-    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    audioRef.current.volume = 0.35;
+    audio.volume = 0.35;
 
     if (isPlaying) {
-      audioRef.current.play().catch((error) => {
-        console.log('Audio play blocked:', error);
+      audio.play().catch(() => {
         setIsPlaying(false);
+        stopBassLoop();
       });
     }
   }, [currentTrack]);
+
+  useEffect(() => {
+    return () => stopBassLoop();
+  }, []);
 
   return (
     <div className="w-full">
@@ -80,6 +146,7 @@ export function MusicPlayer() {
         ref={audioRef}
         src={track.src}
         preload="metadata"
+        crossOrigin="anonymous"
         onTimeUpdate={(event) => {
           const audio = event.currentTarget;
           if (!audio.duration) return;
@@ -117,10 +184,7 @@ export function MusicPlayer() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={prevTrack}
-              className="text-white/35 hover:text-white/70 transition-colors"
-            >
+            <button onClick={prevTrack} className="text-white/35 hover:text-white/70">
               <SkipBack className="w-4 h-4" />
             </button>
 
@@ -128,56 +192,13 @@ export function MusicPlayer() {
               onClick={togglePlay}
               className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-all"
             >
-              {isPlaying ? (
-                <Pause className="w-4 h-4" />
-              ) : (
-                <Play className="w-4 h-4 ml-0.5" />
-              )}
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
             </button>
 
-            <button
-              onClick={nextTrack}
-              className="text-white/35 hover:text-white/70 transition-colors"
-            >
+            <button onClick={nextTrack} className="text-white/35 hover:text-white/70">
               <SkipForward className="w-4 h-4" />
             </button>
           </div>
-        </div>
-
-        <div className="mt-4 pt-3 border-t border-white/[0.06] space-y-1">
-          {tracks.map((item, index) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setCurrentTrack(index);
-                setProgress(0);
-                setIsPlaying(true);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center gap-2 ${
-                index === currentTrack
-                  ? 'bg-white/[0.08]'
-                  : 'hover:bg-white/[0.04]'
-              }`}
-            >
-              <div
-                className={`w-1.5 h-1.5 rounded-full ${
-                  index === currentTrack ? 'bg-white/70' : 'bg-white/20'
-                }`}
-              />
-
-              <span
-                className={`text-xs ${
-                  index === currentTrack ? 'text-white/75' : 'text-white/35'
-                }`}
-              >
-                {item.name}
-              </span>
-
-              <span className="text-[9px] text-white/20 ml-auto">
-                {item.artist}
-              </span>
-            </button>
-          ))}
         </div>
       </div>
     </div>
