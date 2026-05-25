@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,20 +13,29 @@ export function ChatSection() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    const premiumStatus = localStorage.getItem('mindpocket_premium') === 'true';
+    setIsPremium(premiumStatus);
+  }, []);
 
   const userMessagesCount = messages.filter((m) => m.role === 'user').length;
-  const isLimitReached = userMessagesCount >= FREE_LIMIT;
+  const isLimitReached = !isPremium && userMessagesCount >= FREE_LIMIT;
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
     if (isLimitReached) {
+      window.location.href = '/premium';
       return;
     }
 
+    const userText = input;
+
     const userMessage: Message = {
       role: 'user',
-      content: input,
+      content: userText,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -38,7 +47,7 @@ export function ChatSection() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: input,
+          message: userText,
           history: messages,
         }),
       });
@@ -69,13 +78,16 @@ export function ChatSection() {
     <div className="flex flex-col h-full">
       <div className="mb-4 rounded-2xl bg-white/5 border border-white/10 p-4">
         <p className="text-sm text-white/70">
-          Free messages: {Math.min(userMessagesCount, FREE_LIMIT)} / {FREE_LIMIT}
+          {isPremium
+            ? 'Premium active: unlimited messages'
+            : `Free messages: ${Math.min(userMessagesCount, FREE_LIMIT)} / ${FREE_LIMIT}`}
         </p>
       </div>
 
       {isLimitReached && (
         <div className="mb-4 rounded-3xl border border-white/10 bg-white/10 p-5 text-center">
           <h3 className="text-lg font-semibold mb-2">Premium required</h3>
+
           <p className="text-sm text-white/55 mb-4">
             You used 10 free messages. Unlock Premium to continue chatting.
           </p>
@@ -114,7 +126,7 @@ export function ChatSection() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={isLimitReached}
+          disabled={isLimitReached || loading}
           placeholder={
             isLimitReached
               ? 'Unlock Premium to continue...'
