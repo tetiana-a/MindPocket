@@ -54,10 +54,10 @@ const onlineResources = [
     description: 'Kde hledat psychickou pomoc v ČR.',
   },
   {
-    name: 'Psyhelp',
-    url: 'https://psyhelp.cz/',
-    description: 'Databáze psychologů a terapeutů v Česku.',
-  },
+  name: 'Českomoravská psychologická společnost',
+  url: 'https://www.cmps.ecn.cz/',
+  description: 'Odborná psychologická společnost a informace o psychologii v ČR.',
+},
 ];
 
 const selfHelpTips = [
