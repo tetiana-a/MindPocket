@@ -1,86 +1,101 @@
-import OpenAI from 'openai';
-import { NextRequest, NextResponse } from 'next/server';
+'use client';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { useState } from 'react';
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
-    const message = body.message;
-    const history = body.history || [];
+export function ChatSection() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      role: 'user',
+      content: input,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          history: messages,
+        }),
+      });
+
+      const data = await response.json();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.message,
+        },
+      ]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'Omlouvám se, došlo k chybě.',
+        },
+      ]);
     }
 
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      {
-        role: 'system',
-        content: `
-You are MindPocket AI.
+    setLoading(false);
+  };
 
-You are a calm emotional support assistant and AI psychologist.
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto space-y-4 pb-4">
+        {messages.map((msg, index) => (
+          <div
+            key={index}
+            className={`max-w-[80%] rounded-3xl px-5 py-3 text-sm ${
+              msg.role === 'user'
+                ? 'ml-auto bg-white text-black'
+                : 'bg-white/10 text-white'
+            }`}
+          >
+            {msg.content}
+          </div>
+        ))}
 
-Your personality:
-- warm
-- emotionally intelligent
-- calming
-- supportive
-- human-like
+        {loading && (
+          <div className="bg-white/10 text-white rounded-3xl px-5 py-3 text-sm w-fit">
+            MindPocket píše...
+          </div>
+        )}
+      </div>
 
-Rules:
-- ALWAYS answer in Czech language
-- Keep answers short and natural
-- Help with anxiety, stress, loneliness and emotions
-- Never sound robotic
-- Never be cold or aggressive
-- Give calming emotional support
-- Use simple human language
-- Maximum 5 short paragraphs
-- Sometimes ask gentle follow-up questions
-- Support the user emotionally
-`,
-      },
+      <div className="flex gap-3 mt-4">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Napište, co vás trápí..."
+          className="flex-1 rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-white outline-none"
+        />
 
-      ...history.map((msg: any) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-
-      {
-        role: 'user',
-        content: message,
-      },
-    ];
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
-      messages,
-      temperature: 0.9,
-      max_tokens: 400,
-    });
-
-    const aiMessage =
-      completion.choices?.[0]?.message?.content ||
-      'Promiňte, něco se pokazilo.';
-
-    return NextResponse.json({
-      message: aiMessage,
-    });
-  } catch (error: any) {
-    console.error('OPENAI ERROR:', error);
-
-    return NextResponse.json(
-      {
-        error: 'AI server error',
-      },
-      { status: 500 }
-    );
-  }
+        <button
+          onClick={sendMessage}
+          className="px-5 rounded-2xl bg-white text-black font-medium"
+        >
+          →
+        </button>
+      </div>
+    </div>
+  );
 }
