@@ -9,13 +9,6 @@ export async function POST(request: NextRequest) {
   try {
     const { message, history } = await request.json();
 
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
-
     const messages = [
       {
         role: 'system',
@@ -23,22 +16,16 @@ export async function POST(request: NextRequest) {
 You are MindPocket AI.
 
 You are a calm emotional support assistant.
-Speak warmly, naturally and shortly.
 
 Rules:
-- Answer in Czech language
-- Be empathetic
+- Speak Czech
+- Be warm
 - Keep answers short
-- Help calm anxiety and stress
-- Never be aggressive
-- Sound human and supportive
+- Help reduce stress
 `,
       },
 
-      ...(history || []).map((msg: any) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
+      ...(history || []),
 
       {
         role: 'user',
@@ -53,19 +40,15 @@ Rules:
       max_tokens: 300,
     });
 
-    const aiMessage =
-      completion.choices[0]?.message?.content ||
-      'Promiňte, nastala chyba.';
-
     return NextResponse.json({
-      message: aiMessage,
+      message: completion.choices[0].message.content,
     });
   } catch (error) {
-    console.error('CHAT API ERROR:', error);
+    console.error(error);
 
     return NextResponse.json(
       {
-        error: 'AI error',
+        message: 'Omlouvám se, došlo k chybě.',
       },
       { status: 500 }
     );
